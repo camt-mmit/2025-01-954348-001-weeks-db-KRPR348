@@ -1,0 +1,156 @@
+:root {
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+table.app-cmp-data-list {
+    border-collapse: collapse;
+
+    width: 100%;
+}
+
+table.app-cmp-data-list,
+table.app-cmp-data-list > * > tr > :is(th, td) {
+    border: 1px solid black;
+}
+table.app-cmp-main-content {
+    display: grid;
+}
+dl.app-cmp-data-detail {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+dl.app-cmp-data-detail > dt {
+    display: flex;
+    flex-direction: row;
+
+    font-weight: bold;
+}
+
+dl.app-cmp-data-detail > dt::after {
+    content: "::";
+    padding-left: 1ch;
+    padding-right: 1ch;
+
+    margin-left: auto;
+}
+
+.app-cmp-product-image {
+    width: 64px;
+}
+
+#app-cmp-main-header,
+#app-cmp-main-footer {
+    text-align: center;
+}
+
+#app-cmp-main-header {
+    margin-bottom: 64px;
+}
+
+#app-cmp-main-content {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#app-cmp-main-footer {
+    margin-top: 64px;
+}
+
+/* additional styles */
+table.app-cmp-data-list > caption {
+    font-weight: bold;
+}
+
+.app-cmp-links {
+    --app-primary: blue;
+
+    margin: 0px;
+    padding: 0px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    column-gap: 8px;
+
+    list-style: none;
+
+    &>* {
+        margin: 0px;
+        padding: 0px;
+
+        border-radius: 4px;
+        border: 1px solid var(--app-primary);
+
+        &>* {
+            display: block;
+            box-sizing: border-box;
+
+            margin: 0px;
+            padding: 0.5em 1ch;
+
+            width: 100%;
+            height: 100%;
+
+            text-decoration: none;
+            color: var(--app-primary);
+            font-weight: bold;
+
+            &:hover {
+                background-color: rgba(128,128,128,0.75);
+            }
+        }
+    }
+}
+td{
+    text-align: center;
+    padding-left: 5px;
+}
+input{
+    margin-bottom: 5px;
+}
+.app-category-name {
+    color: orange;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.app-cmp-product-image2 {
+    text-align: center;
+}
+
+.app-cmp-product-code{
+    color: green;
+    font-weight: bold;
+    font-style: italic;
+    text-decoration: none;
+    &:hover {
+                text-decoration: underline;
+            }
+}
+.app-cmp-product-cat{
+    color: orange;
+    font-weight: bold;
+    font-style: italic;
+    text-decoration: none;
+    &:hover {
+                text-decoration: underline;
+            }
+}
+
+.app-cmp-product-code1{
+    color: green;
+    font-weight: bold;
+    font-style: italic;
+    text-decoration: none;
+
+}
+
+.app-cmp-product-cat1{
+    color: orange;
+    font-weight: bold;
+    font-style: italic;
+}
