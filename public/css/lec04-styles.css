@@ -7,6 +7,7 @@ table.app-cmp-data-list {
     border-collapse: collapse;
 
     width: 100%;
+    
 }
 
 table.app-cmp-data-list,
@@ -24,7 +25,7 @@ dl.app-cmp-data-detail {
 dl.app-cmp-data-detail > dt {
     display: flex;
     flex-direction: row;
-
+    margin-bottom: 5px;
     font-weight: bold;
 }
 
@@ -63,13 +64,14 @@ dl.app-cmp-data-detail > dt::after {
 table.app-cmp-data-list > caption {
     font-weight: bold;
 }
-
+th {
+    background-color: grey;
+}
 .app-cmp-links {
     --app-primary: blue;
-
+    
     margin: 0px;
     padding: 0px;
-
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -106,7 +108,7 @@ table.app-cmp-data-list > caption {
     }
 }
 td{
-    text-align: center;
+
     padding-left: 5px;
 }
 input{

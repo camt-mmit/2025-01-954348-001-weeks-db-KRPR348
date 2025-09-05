@@ -1,10 +1,10 @@
-@extends('products.main', [
-    'title' => $product->code,
+@extends('shops.main', [
+    'title' => $product ->name,
 ])
 
 @section('header')
     <nav>
-        <form action="{{ route('products.delete', [
+        <form action="{{ route('shops.delete', [
             'product' => $product->code,
         ]) }}" method="post"
             id="app-form-delete">
@@ -14,7 +14,7 @@
         <ul class="app-cmp-links">
             <li>
                 <a
-                    href="{{ route('products.update-form', [
+                    href="{{ route('shops.update-form', [
                         'product' => $product->code,
                     ]) }}">Update</a>
             </li>
@@ -28,20 +28,29 @@
 @section('content')
     <dl class="app-cmp-data-detail">
         <dt>Code</dt>
-        <dd>
+        <dd style="color: blue;"><b>
             <span class="app-cl-code">{{ $product->code }}</span>
-        </dd>
+</b></dd>
 
         <dt>Name</dt>
         <dd>
             {{ $product->name }}
         </dd>
 
-        <dt>Price</dt>
+        <dt>Owner</dt>
         <dd>
-            <span style="display: inline-block; width: 10ch;" class="app-cl-number">{{ $product->price }}</span>
+            {{ $product->owner }}
+        </dd>
+
+        <dt>Location</dt>
+        <dd>
+            <span class="app-cl-number">{{ $product->latitude }}, {{ $product->longitude }}</span>
+        </dd>
+
+        <dt>Address</dt>
+        <dd>
+            <pre  style="margin: 0px;">{{ $product->address }}</pre>
         </dd>
     </dl>
 
-    <pre>{{ $product->description }}</pre>
 @endsection

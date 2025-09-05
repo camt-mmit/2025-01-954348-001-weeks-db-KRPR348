@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{ asset('css/lec04-styles.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/common.css') }}" />
     <title>DB - {{ $title }} </title>
 </head>
 
@@ -14,9 +14,9 @@
         <h1>DB - <span @class($titleclasses ?? [])>{{ $title }}</span></h1>
         <nav>
             <ul class="app-cmp-links">
-                <li><a href="{{ route('products.list') }}">Product</a>
+                <li><a href="{{ route('products.list') }}">Products</a>
                 </li>
-                <li>
+                <li><a href="{{ route('shops.list') }}">Shops</a>
                 </li>
             </ul>
         </nav>
