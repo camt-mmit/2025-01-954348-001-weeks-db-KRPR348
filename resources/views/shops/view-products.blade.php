@@ -1,5 +1,7 @@
-@extends('products.main', [
-    'title' => 'List',
+@extends('shops.main', [
+    'title' => $product->code,
+    'titleClasses' => ['app-cl-code'],
+
     'mainClasses' => ['app-ly-max-width'],
 ])
 
@@ -21,23 +23,19 @@
 
             <div class="app-cmp-form-actions">
                 <button type="submit" class="primary">Search</button>
-                <a href="{{ route('products.list') }}">
+                <a href="{{ route('shops.view-products',['product' =>$product->code,]) }}">
                     <button type="button" class="accent">X</button>
                 </a>
             </div>
         </form>
     </search>
 
-    <div class="app-cmp-links-bar">
-        <nav>
-            <ul class="app-cmp-links">
-                <li>
-                    <a href="{{ route('products.create-form') }}">New Product</a>
-                </li>
-            </ul>
-        </nav>
+<ul class="app-cmp-links">
+<li><a href="{{ route('shops.view', [
+'product' => $product->code,
+]) }}">&lt; Back</a></li>
 
-        {{ $products->withQueryString()->links() }}
+{{ $shops->withQueryString()->links() }}
     </div>
 @endsection
 
@@ -58,7 +56,7 @@
         </thead>
 
         <tbody>
-            @foreach ($products as $product)
+            @foreach ($shops as $product)
                 <tr>
                     <td>
                         <a href="{{ route('products.view', [
@@ -69,7 +67,7 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ number_format($product->category_id, ) }}</td>
+                    <td class="app-cl-number">{{ number_format($product->category_id, 0) }}</td>
                     <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
                     <td class="app-cl-number">{{ $product->shops_count }}</td>
                 </tr>

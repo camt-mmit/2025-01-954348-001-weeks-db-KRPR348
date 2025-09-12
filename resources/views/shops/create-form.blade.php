@@ -17,10 +17,10 @@
             <input type="text" id="app-inp-price" name="owner" required />
 
             <label for="app-inp-price">Latitude</label>
-            <input type="number" id="app-inp-price" name="latitude" required />
+            <input type="number" id="app-inp-price" name="latitude" step="any" required />
 
             <label for="app-inp-price">Longitude</label>
-            <input type="number" id="app-inp-price" name="longitude" required />
+            <input type="number" id="app-inp-price" name="longitude" step="any" required />
 
             <label for="app-inp-address">Address</label>
             <textarea id="app-inp-address" name="address" cols="80" rows="10" required></textarea>

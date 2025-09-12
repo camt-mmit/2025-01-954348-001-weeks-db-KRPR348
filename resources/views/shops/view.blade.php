@@ -13,6 +13,11 @@
 
         <ul class="app-cmp-links">
             <li>
+            <a href="{{ route('shops.view-products', [
+            'product' => $product->code,
+            ]) }}">View Products</a></li>
+        <li>
+            <li>
                 <a
                     href="{{ route('shops.update-form', [
                         'product' => $product->code,

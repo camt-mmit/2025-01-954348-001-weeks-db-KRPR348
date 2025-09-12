@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,11 +21,10 @@ abstract class SearchableController extends Controller
     {
         $query
             ->where('code', 'LIKE', "%{$word}%")
-            ->orWhere('name', 'LIKE', "%{$word}%")
-            ->orWhere('owner', 'LIKE', "%{$word}%");
+            ->orWhere('name', 'LIKE', "%{$word}%");
     }
 
-    function filterByTerm(Builder $query, ?string $term): Builder
+    function filterByTerm(Builder|Relation $query, ?string $term): Builder|Relation
     {
         if (!empty($term)) {
             foreach (\preg_split('/\s+/', \trim($term)) as $word) {
@@ -38,7 +37,7 @@ abstract class SearchableController extends Controller
         return $query;
     }
 
-    function filter(Builder $query, array $criteria): Builder
+    function filter(Builder|Relation $query, array $criteria): Builder|Relation
     {
         return $this->filterByTerm($query, $criteria['term']);
     }

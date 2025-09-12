@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,7 @@ Route::controller(ProductController::class)
         Route::post('/create', 'create')->name('create');
         Route::prefix('/{product}')->group(static function (): void {
             Route::get('', 'view')->name('view');
+            Route::get('/shops', 'viewShops')->name('view-shops');
             Route::get('/update', 'showUpdateForm')->name('update-form');
             Route::post('/update', 'update')->name('update');
             Route::post('/delete', 'delete')->name('delete');
@@ -33,8 +35,27 @@ Route::controller(ShopController::class)
         route::post('/create', 'create')->name('create');
         route::prefix('/{product}')->group(static function (): void {
             route::get('', 'view')->name('view');
+            Route::get('/shops', 'viewProducts')->name('view-products');
             route::get('/update', 'showUpdateForm')->name('update-form');
             route::post('/update', 'update')->name('update');
             route::post('/delete', 'delete')->name('delete');
+        });
+    });
+
+Route::controller(CategoryController::class)
+    ->prefix('/categories')
+    ->name('categories.')
+    ->group(static function (): void {
+        route::get('', 'list')->name('list');
+        route::get('/create', 'showCreateForm')->name('create-form');
+        route::post('/create', 'create')->name('create');
+        route::prefix('/{product}')->group(static function (): void {
+            route::get('', 'view')->name('view');
+            Route::get('/products', 'viewProducts')->name('view-products');
+            route::get('/update', 'showUpdateForm')->name('update-form');
+            route::post('/update', 'update')->name('update');
+            route::post('/delete', 'delete')->name('delete');
+
+
         });
     });

@@ -1,10 +1,13 @@
-@extends('shops.main',[
-'title' => 'List',
+@extends('shops.main', [
+    'title' => $product->code,
+    'titleClasses' => ['app-cl-code'],
+    'subTitle' => ['Shops'],
+    'mainClasses' => ['app-ly-max-width'],
 ])
 
 @section('header')
     <search>
-        <form action="{{ route('shops.list') }}" method="get" class="app-cmp-search-form">
+        <form action="{{ route('products.view-shops', ['product' => $product->code,]) }}" method="get" class="app-cmp-search-form">
             <div class="app-cmp-form-detail">
                 <label for="app-criteria-term">Search</label>
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
@@ -12,23 +15,17 @@
 
             <div class="app-cmp-form-actions">
                 <button type="submit" class="primary">Search</button>
-                <a href="{{ route('shops.list') }}">
-                    <button type="button" class="accent">X</button>
-                </a>
+                <a href="{{ route('products.view-shops', ['product' => $product->code,]) }}">
+<button type="button" class="app-cl-accent">X</button></a>
             </div>
         </form>
     </search>
+<ul class="app-cmp-links">
+<li><a href="{{ route('products.view', [
+'product' => $product->code,
+]) }}">&lt; Back</a></li>
 
-    <div class="app-cmp-links-bar">
-        <nav>
-            <ul class="app-cmp-links">
-                <li>
-                    <a href="{{ route('shops.create-form') }}">New Shop</a>
-                </li>
-            </ul>
-        </nav>
-
-        {{ $products->withQueryString()->links() }}
+{{ $shops->withQueryString()->links() }}
     </div>
 @endsection
 
@@ -48,7 +45,7 @@
         </thead>
 
         <tbody>
-            @foreach ($products as $shop)
+            @foreach ($shops as $shop)
                 <tr>
                     <td><b>
                         <a href="{{ route('shops.view', [
