@@ -142,4 +142,51 @@ class CategoryController extends SearchableController
             'shops' => $query->paginate($shopController::MAX_ITEMS),
         ]);
     }
+
+    function showAddProductsForm(ServerRequestInterface $request, ProductController $productController, string $productCode): View
+    {
+        $category = $this->find($productCode);
+        $criteria = $productController->prepareCriteria($request->getQueryParams());
+        $query = $productController
+            ->getQuery()
+            ->whereDoesntHave(
+                 'category',
+                function (Builder $innerQuery) use ($category) {
+                    return $innerQuery->where('code', $category->code);
+                },
+            );
+        $query = $productController
+            ->filter($query, $criteria)
+            ->withCount('shops');
+        return view('categories.add-products-form', [
+            'criteria' => $criteria,
+            'category' => $category,
+            'categories' => $query->paginate($productController::MAX_ITEMS),
+        ]);
+    }
+        function addProduct(
+    ServerRequestInterface $request,
+    ProductController $productController,
+    string $productCode
+): RedirectResponse {
+    $category = $this->find($productCode);
+    $data = $request->getParsedBody();
+
+    // Retrieve the product, ensuring it does not already belong to the category
+    $product = $productController
+        ->getQuery()
+        ->whereDoesntHave('category', function (Builder $innerQuery) use ($category): void {
+            $innerQuery->where('code', $category->code);
+        })
+        ->where('code', $data['shop'])
+        ->firstOrFail();
+
+    // Associate the product with the category using 'associate'
+    $product->category()->associate($category);
+
+    // Save the product to persist the association
+    $product->save();
+
+    return redirect()->back();
+}
 }

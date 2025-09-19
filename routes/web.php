@@ -23,6 +23,12 @@ Route::controller(ProductController::class)
             Route::get('/update', 'showUpdateForm')->name('update-form');
             Route::post('/update', 'update')->name('update');
             Route::post('/delete', 'delete')->name('delete');
+            Route::prefix('/shops')->group(static function() : void {
+                Route::get('', 'viewShops')->name('view-shops');
+                Route::get('/add', 'showAddShopsForm')->name('add-shops-form');
+                Route::post('/add', 'addShop')->name('add-shop');
+                Route::post('/remove','removeShop')->name('remove-shop');
+            });
         });
     });
 
@@ -35,10 +41,16 @@ Route::controller(ShopController::class)
         route::post('/create', 'create')->name('create');
         route::prefix('/{product}')->group(static function (): void {
             route::get('', 'view')->name('view');
-            Route::get('/shops', 'viewProducts')->name('view-products');
+            Route::get('/products', 'viewProducts')->name('view-products');
             route::get('/update', 'showUpdateForm')->name('update-form');
             route::post('/update', 'update')->name('update');
             route::post('/delete', 'delete')->name('delete');
+            Route::prefix('/products')->group(static function() : void {
+                Route::get('', 'viewProducts')->name('view-products');
+                Route::get('/add', 'showAddProductsForm')->name('add-products-form');
+                Route::post('/add', 'addProduct')->name('add-product');
+                Route::post('/remove','removeProduct')->name('remove-product');
+            });
         });
     });
 
@@ -55,7 +67,11 @@ Route::controller(CategoryController::class)
             route::get('/update', 'showUpdateForm')->name('update-form');
             route::post('/update', 'update')->name('update');
             route::post('/delete', 'delete')->name('delete');
-
+            Route::prefix('/products')->group(static function() : void {
+                Route::get('', 'viewProducts')->name('view-products');
+                Route::get('/add', 'showAddProductsForm')->name('add-products-form');
+                Route::post('/add', 'addProduct')->name('add-product');
+            });
 
         });
     });

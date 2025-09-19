@@ -8,20 +8,19 @@
     ])}}" method="post" id="app-form-delete">
         @csrf
     </form>
-    <ul>
-        <li class="app-cmp-links">
+    <ul class="app-cmp-links">
+        <li >
             <a href="{{route('categories.update-form',[
             'product' => $product->code,
             ])}}">Update</a>
         </li>
 
-        <li>
+        <li >
             <a href="{{ route('categories.view-products', [
             'product' => $product->code,
             ]) }}">View Products</a></li>
-        <li>
-
-            <button type="submit" form="app-form-delete">Delete</button>
+        <li class="app-cl-warn">
+            <button type="submit" form="app-form-delete" class="app-cl-link">Delete</button>
         </li>
     </ul>
 </nav>

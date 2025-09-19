@@ -20,22 +20,17 @@
             </div>
         </form>
     </search>
-
-    <div class="app-cmp-links-bar">
-        <nav>
-<form action="{{ route('products.remove-shop', [
+    <div >
+<form action="{{ route('products.add-shop', [
 'product' => $product->code,
-]) }}" id="app-form-remove-shop" method="post">
+]) }}" id="app-form-add-shop" method="post">
 @csrf
-</form>
+</form></a>
+    </div>
 <ul class="app-cmp-links">
-<li><a href="{{ route('products.view', [
+<li><a href="{{ route('products.view-shops', [
 'product' => $product->code,
 ]) }}">&lt; Back</a></li>
-<li><a href="{{ route('products.add-shops-form', [
-'product' => $product->code,
-]) }}">&lt; Add Shops</a></li>
-</nav>
 
 {{ $shops->withQueryString()->links() }}
     </div>
@@ -56,6 +51,7 @@
                 <th>Name</th>
                 <th>Owner</th>
                 <th>No. of Products</th>
+                <th></th>
             </tr>
         </thead>
 
@@ -74,7 +70,8 @@
                     <td>{{ $shop->owner }}</td>
                     <td class="app-cl-number">{{  number_format($shop->products_count,0) }}</td>
                     <td>
-                        <button type="submit" form="app-form-remove-shop" name="shop" value="{{ $shop->code }}">Remove</button>
+                        <button type="submit" form="app-form-add-shop" name="shop" 
+                        value="{{ $shop->code }}">Add</button>
                     </td>
                 </tr>
             @endforeach

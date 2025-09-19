@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 use App\Models\Shop;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Psr\Http\Message\ServerRequestInterface;
@@ -136,18 +137,79 @@ class ShopController extends SearchableController
         ShopController $shopController,
         String $productCode,
     ): view {
-        $product = $this->find($productCode);
+        $shop = $this->find($productCode);
         $criteria = $shopController->prepareCriteria($request->getQueryParams());
         $query = $shopController->filter(
-            $product->products(),
+            $shop->products(),
             $criteria,
         )
             ->withCount('shops');
 
         return view('shops.view-products', [
-            'product' => $product,
+            'shop' => $shop,
             'criteria' => $criteria,
             'shops' => $query->paginate($shopController::MAX_ITEMS),
         ]);
+    }
+
+    function showAddProductsForm(ServerRequestInterface $request, ProductController $productController, string $productCode): View
+    {
+        $shop = $this->find($productCode);
+        $criteria = $productController->prepareCriteria($request->getQueryParams());
+        $query = $productController
+            ->getQuery()
+            ->whereDoesntHave(
+                 'shops',
+                function (Builder $innerQuery) use ($shop) {
+                    return $innerQuery->where('code', $shop->code);
+                },
+            );
+        $query = $productController
+            ->filter($query, $criteria)
+            ->withCount('shops');
+
+        return view('shops.add-products-form', [
+            'criteria' => $criteria,
+            'shop' => $shop,
+            'shops' => $query->paginate($productController::MAX_ITEMS),
+        ]);
+    }
+        function addProduct(
+            ServerRequestInterface $request,
+            ProductController $productController,
+            string $productCode,
+        ) : RedirectResponse {
+            $shop = $this->find($productCode);
+        $data = $request->getParsedBody();
+        $product = $productController
+            ->getQuery()
+            ->whereDoesntHave(
+                'shops',
+                function (Builder $innerQuery) use ($shop): void {
+                    $innerQuery->where('code', $shop->code);
+                },
+            )
+            ->where('code',$data['shop'])
+            ->firstOrFail();
+            
+                $shop->products()->attach($product);
+
+            return redirect()->back();
+        }
+    function removeProduct(
+        ServerRequestInterface $request,
+        string $productCode,
+    ): RedirectResponse {
+        $shop = $this->find($productCode);
+        $data = $request->getParsedBody();
+
+        $product = $shop
+            ->products()
+            ->where('code',$data['shop'])
+            ->firstOrFail();
+
+        $shop->products()->detach($product);
+
+            return redirect()->back();
     }
 }

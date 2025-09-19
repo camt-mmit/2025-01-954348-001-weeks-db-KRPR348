@@ -40,6 +40,14 @@
             {{ $product->name }}
         </dd>
 
+        <dt>Category</dt>
+        <dd>
+         [<a href="{{route('categories.view',[
+            'product' => $product->category->code,]) }}" class="app-cl-code">
+                {{ $product->category->code }} </a>]
+                {{ $product->category->name }}
+    </dd>
+
         <dt>Price</dt>
         <dd>
             <span style="display: inline-block; width: 10ch;" class="app-cl-number">{{ $product->price }}</span>

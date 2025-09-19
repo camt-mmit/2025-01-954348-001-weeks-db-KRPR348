@@ -69,7 +69,7 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ number_format($product->category_id, ) }}</td>
+                    <td >{{ $product->category->name }}</td>
                     <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
                     <td class="app-cl-number">{{ $product->shops_count }}</td>
                 </tr>

@@ -29,7 +29,7 @@
         <nav>
             <ul class="app-cmp-links">
                 <li>
-                    <a href="{{ route('categories.create-form') }}">New Product</a>
+                    <a href="{{ route('categories.create-form') }}">New Category</a>
                 </li>
             </ul>
         </nav>
@@ -48,8 +48,6 @@
             <tr>
                 <th>Code</th>
                 <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
                 <th>No. of Shops</th>
             </tr>
         </thead>
@@ -66,8 +64,6 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ number_format($product->category_id, ) }}</td>
-                    <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
                     <td class="app-cl-number">{{ $product->products_count }}</td>
                 </tr>
             @endforeach

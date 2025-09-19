@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shop;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse as HttpFoundationRedirectResponse;
 
 class ProductController extends SearchableController
 {
@@ -31,6 +34,17 @@ class ProductController extends SearchableController
                 ? null
                 : (float) $criteria['maxPrice'],
         ];
+    }
+
+    #[\Override]
+    function applywhereToFilterByterm(Builder $query, string $word): void
+    {
+        parent::applyWhereToFilterByTerm($query, $word);
+        $query ->orWhereHas('category', function (Builder $query)use($word) {
+            // $query is for Category model
+            $query->Where('name', 'LIKE', "%{$word}%");
+        });
+        
     }
 
     function filterByPrice(
@@ -124,18 +138,78 @@ class ProductController extends SearchableController
         return redirect()->route('products.list');
     }
 
-    function viewShops(ServerRequestInterface $request,ShopController $shopController,string $productCode): View 
+    function viewShops(ServerRequestInterface $request, ShopController $shopController, string $productCode): View
     {
         $product = $this->find($productCode);
         $criteria = $shopController->prepareCriteria($request->getQueryParams());
         $query = $shopController
 
-        ->filter($product->shops(), $criteria)
-        ->withCount('products');
+            ->filter($product->shops(), $criteria)
+            ->withCount('products');
         return view('products.view-shops', [
             'product' => $product,
             'criteria' => $criteria,
             'shops' => $query->paginate($shopController::MAX_ITEMS),
         ]);
-}
+    }
+    function showAddShopsForm(ServerRequestInterface $request, ShopController $shopController, string $productCode): View
+    {
+        $product = $this->find($productCode);
+        $criteria = $shopController->prepareCriteria($request->getQueryParams());
+        $query = $shopController
+            ->getQuery()
+            ->whereDoesntHave(
+                'products',
+                function (Builder $innerQuery) use ($product) {
+                    return $innerQuery->where('code', $product->code);
+                },
+            );
+        $query = $shopController
+            ->filter($query, $criteria)
+            ->withCount('products');
+
+        return view('products.add-shops-form', [
+            'criteria' => $criteria,
+            'product' => $product,
+            'shops' => $query->paginate($shopController::MAX_ITEMS),
+        ]);
+    }
+    function addShop(
+        ServerRequestInterface $request,
+        ShopController $shopController,
+        string $productCode,
+    ): RedirectResponse {
+        $product = $this->find($productCode);
+        $data = $request->getParsedBody();
+        $shop = $shopController
+            ->getQuery()
+            ->whereDoesntHave(
+                'products',
+                function (Builder $innerQuery) use ($product): void {
+                    $innerQuery->where('code', $product->code);
+                },
+            )
+            ->where('code', $data['shop'])
+            ->firstOrFail();
+
+        $product->shops()->attach($shop);
+
+        return redirect()->back();
+    }
+    function removeShop(
+        ServerRequestInterface $request,
+        string $productCode,
+    ): RedirectResponse {
+        $product = $this->find($productCode);
+        $data = $request->getParsedBody();
+
+        $shop = $product
+            ->shops()
+            ->where('code', $data['shop'])
+            ->firstOrFail();
+
+        $product->shops()->detach($shop);
+
+        return redirect()->back();
+    }
 }
