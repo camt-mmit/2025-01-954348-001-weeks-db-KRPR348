@@ -15,6 +15,14 @@
             <label for="app-inp-name">Name</label>
             <input type="text" id="app-inp-name" name="name" value="{{ $product->name }}" required />
 
+            <label for="app-inp-description">Category</label>
+            <select name="category" id="">
+            @foreach($category as $cate)
+            <option value="{{$cate->code}}" @if($product->category->code === $cate->code) selected @endif >
+            [{{ $cate->code }}] {{ $cate->name }}</option>
+            @endforeach
+        </select>
+
             <label for="app-inp-price">Price</label>
             <input type="number" id="app-inp-price" name="price" value="{{ $product->price }}" step="any" required />
 

@@ -13,6 +13,14 @@
             <label for="app-inp-name">Name</label>
             <input type="text" id="app-inp-name" name="name" required />
 
+            <label for="app-inp-description">Category</label>
+            <select name="category" id="">
+                <option value="" selected>---Please Select---</option>
+                @foreach($category as $cate)
+                    <option  value="{{$cate->code}}">{{$cate->code}}{{$cate->name}}</option>
+                @endforeach
+            </select>
+
             <label for="app-inp-price">Price</label>
             <input type="number" id="app-inp-price" name="price" step="any" required />
 

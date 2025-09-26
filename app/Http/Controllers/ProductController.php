@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Category;
 use App\Models\Shop;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -96,34 +96,48 @@ class ProductController extends SearchableController
         ]);
     }
 
-    function showCreateForm(): View
+    public function showCreateForm(): View
     {
-        return view('products.create-form');
-    }
-
-    function create(ServerRequestInterface $request): RedirectResponse
-    {
-        $product = Product::create($request->getParsedBody());
-
-        return redirect()->route('products.list');
-    }
-
-    function showUpdateForm(string $productCode): View
-    {
-        $product = $this->find($productCode);
-
-        return view('products.update-form', [
-            'product' => $product,
+        // $category = $categorycontroller->getQuery()->get();
+        $category = Category::all();
+        return view('products.create-form', [
+            'category' => $category,
         ]);
     }
 
-    function update(
-        ServerRequestInterface $request,
-        string $productCode,
-    ): RedirectResponse {
-        $product = $this->find($productCode);
-        $product->fill($request->getParsedBody());
+
+    public function create(ServerRequestInterface $request, CategoryController $categoryController): RedirectResponse
+    {
+        $data = $request->getParsedBody();
+        $category = $categoryController->find($data['category']);
+
+        $product = new Product();
+        $product->fill($data);
+        $product->category()->associate($category);
         $product->save();
+
+        return redirect()->route('products.list');
+    }
+    function showUpdateForm(string $productCode): View
+    {
+        $category = Category::all();
+        $product = $this->find($productCode);
+        return view('products.update-form', [
+            'product' => $product,
+            'category' => $category,
+        ]);
+    }
+
+    function update(ServerRequestInterface $request, string $productCode, CategoryController $categoryController): RedirectResponse
+    {
+        $product = $this->find($productCode);
+        $data = $request->getParsedBody();
+        $category = $categoryController->find($data['category']);
+
+        $product->fill($data);
+        $product->category()->associate($category);
+        $product->save();
+
 
         return redirect()->route('products.view', [
             'product' => $product->code,
