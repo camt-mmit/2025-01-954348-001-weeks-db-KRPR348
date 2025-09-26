@@ -9,6 +9,9 @@
         @csrf
     </form>
     <ul class="app-cmp-links">
+        <li>
+                <a href="{{ session()->get('bookmarks.categories.view' ,route('categories.list')) }}">&lt; Back </a>
+            </li>
         <li >
             <a href="{{route('categories.update-form',[
             'product' => $product->code,

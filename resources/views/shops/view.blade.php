@@ -13,6 +13,10 @@
 
         <ul class="app-cmp-links">
             <li>
+                <a href="{{ session()->get('bookmarks.shops.view' ,route('shops.list')) }}">&lt; Back </a>
+            </li>
+
+            <li>
             <a href="{{ route('shops.view-products', [
             'product' => $product->code,
             ]) }}">View Products</a></li>

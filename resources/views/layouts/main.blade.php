@@ -16,7 +16,7 @@
             <ul class="app-cmp-links">
                 <li><a href="{{ route('products.list') }}">Products</a>
                 </li>
-                <li >
+                <li>
                     <a href="{{route('categories.list')}}">Category</a>
                 </li>
                 <li><a href="{{ route('shops.list') }}">Shops</a>
@@ -29,13 +29,21 @@
     <main id="app-cmp-main-content">
         <header>
             <h1>{{ $title }}</h1>
+            <div class="app-cmp-notifications">
+                @session('status')
+                    <div role="status">
+                        {{ $value }}
+                    </div>
+                @endsession
+            </div>
+
             @yield('header')
         </header>
         @yield('content')
     </main>
 
     <footer id="app-cmp-main-footer">
-        &#xA9; Copyright Week-07, 2025 Krittapol's DB.
+        &#xA9; Copyright Week-07-08-09-10-11, 2025 Krittapol's DB.
     </footer>
 </body>
 

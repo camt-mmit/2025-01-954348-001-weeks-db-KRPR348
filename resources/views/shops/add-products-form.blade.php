@@ -7,10 +7,18 @@
 
 @section('header')
     <search>
-        <form action="{{ route('shops.view-products', ['product' => $shop->code,]) }}" method="get" class="app-cmp-search-form">
+        <form action="{{ route('shops.add-products-form', ['product' => $shop->code,]) }}" method="get" class="app-cmp-search-form">
             <div class="app-cmp-form-detail">
                 <label for="app-criteria-term">Search</label>
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
+
+                <label for="app-criteria-min-price">Min Price</label>
+                <input type="number" id="app-criteria-min-price" name="minPrice" value="{{ $criteria['minPrice'] }}"
+                    step="any" />
+
+                <label for="app-criteria-max-price">Max Price</label>
+                <input type="number" id="app-criteria-max-price" name="maxPrice" value="{{ $criteria['maxPrice'] }}"
+                    step="any" />
             </div>
 
             <div class="app-cmp-form-actions">
@@ -28,9 +36,8 @@
 </form></a>
     </div>
 <ul class="app-cmp-links">
-<li><a href="{{ route('shops.view-products', [
-'product' => $shop->code,
-]) }}">&lt; Back</a></li>
+<li><a href="{{ session()->get('bookmarks.shops.view-products' 
+,route('shops.list')) }}">&lt; Back </a></li>
 
 {{ $shops->withQueryString()->links() }}
     </div>
@@ -57,6 +64,13 @@
         </thead>
 
         <tbody>
+
+            @php
+            session()->put('bookmarks.shops.add-products-form',url()->full());
+            @endphp
+            @php
+            session()->put('bookmarks.categories.view',url()->full());
+        @endphp
             @foreach ($shops as $product)
                 <tr>
                     <td>
@@ -68,7 +82,10 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ number_format($product->category_id, 0) }}</td>
+                    <td class="app-cl-number"><a href="{{ route('categories.view', [
+                            'product' => $product->category->code,
+                        ]) }}"
+                            class="app-cl-code">{{ $product->category->name }}</a></td>
                     <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
                     <td class="app-cl-number">{{ $product->shops_count }}</td>
                     <td>

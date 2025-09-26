@@ -84,7 +84,8 @@ class CategoryController extends SearchableController
      public function create(ServerRequestInterface $request): RedirectResponse
     {
         $category = Category::create($request->getParsedBody());
-        return redirect()->route('categories.list');
+        return redirect()->route('categories.list')
+        ->with('status', "Category {$category->name} was created.");
     }
 
        public function view(string $productCode): View
@@ -112,7 +113,8 @@ class CategoryController extends SearchableController
 
         return redirect()->route('categories.view', [
             'product' => $product->code,
-        ]);
+        ])
+        ->with('status', "Category {$product->name} was updated.");
     }
 
         function delete(string $productCode): RedirectResponse
@@ -120,7 +122,8 @@ class CategoryController extends SearchableController
         $product = $this->find($productCode);
         $product->delete();
 
-        return redirect()->route('categories.list');
+        return redirect()->route('categories.list')
+        ->with('status', "Product {$product->code} was deleted.");
     }
 
         function viewProducts(
@@ -187,6 +190,7 @@ class CategoryController extends SearchableController
     // Save the product to persist the association
     $product->save();
 
-    return redirect()->back();
+    return redirect()->back()
+    ->with('status', "Product {$product->name} was added to Category {$category->name}.");
 }
 }

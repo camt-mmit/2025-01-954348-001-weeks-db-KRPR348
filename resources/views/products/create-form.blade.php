@@ -30,6 +30,11 @@
 
         <div class="app-cmp-form-actions">
             <button type="submit">Create</button>
+
+            <a href="{{ session()->get('bookmarks.products.create-form',route('products.list')) }}"><button type="button">Cancel</button>
+            </a>
+
         </div>
+
     </form>
 @endsection

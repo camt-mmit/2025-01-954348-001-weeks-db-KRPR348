@@ -60,6 +60,11 @@
         </thead>
 
         <tbody>
+            @php
+            session()->put('bookmarks.products.view-shops',url()->full());
+            session()->put('bookmarks.shops.view',url()->full());
+        @endphp
+
             @foreach ($shops as $shop)
                 <tr>
                     <td><b>

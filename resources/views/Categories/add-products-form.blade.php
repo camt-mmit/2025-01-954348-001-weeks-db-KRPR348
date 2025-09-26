@@ -7,10 +7,18 @@
 
 @section('header')
     <search>
-        <form action="{{ route('categories.view-products', ['product' => $category->code,]) }}" method="get" class="app-cmp-search-form">
+        <form action="{{ route('categories.add-products-form', ['product' => $category->code,]) }}" method="get" class="app-cmp-search-form">
             <div class="app-cmp-form-detail">
                 <label for="app-criteria-term">Search</label>
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
+
+                <label for="app-criteria-min-price">Min Price</label>
+                <input type="number" id="app-criteria-min-price" name="minPrice" value="{{ $criteria['minPrice'] }}"
+                    step="any" />
+
+                <label for="app-criteria-max-price">Max Price</label>
+                <input type="number" id="app-criteria-max-price" name="maxPrice" value="{{ $criteria['maxPrice'] }}"
+                    step="any" />
             </div>
 
             <div class="app-cmp-form-actions">
@@ -28,9 +36,8 @@
 </form></a>
     </div>
 <ul class="app-cmp-links">
-<li><a href="{{ route('categories.view-products', [
-'product' => $category->code,
-]) }}">&lt; Back</a></li>
+<li><a href="{{ session()->get('bookmarks.categories.view-product' 
+,route('categories.list')) }}">&lt; Back </a></li>
 
 {{ $categories->withQueryString()->links() }}
     </div>
@@ -57,6 +64,11 @@
         </thead>
 
         <tbody>
+
+        @php
+            session()->put('bookmarks.products.view',url()->full());
+        @endphp
+
             @foreach ($categories as $product)
                 <tr>
                     <td>

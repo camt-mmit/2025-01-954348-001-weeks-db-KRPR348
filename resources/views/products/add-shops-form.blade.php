@@ -7,7 +7,9 @@
 
 @section('header')
     <search>
-        <form action="{{ route('products.view-shops', ['product' => $product->code,]) }}" method="get" class="app-cmp-search-form">
+        
+
+        <form action="{{ route('products.add-shops-form', ['product' => $product->code,]) }}" method="get" class="app-cmp-search-form">
             <div class="app-cmp-form-detail">
                 <label for="app-criteria-term">Search</label>
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
@@ -28,9 +30,8 @@
 </form></a>
     </div>
 <ul class="app-cmp-links">
-<li><a href="{{ route('products.view-shops', [
-'product' => $product->code,
-]) }}">&lt; Back</a></li>
+<li><a href="{{ session()->get('bookmarks.products.view-shops' 
+,route('products.list')) }}">&lt; Back </a></li>
 
 {{ $shops->withQueryString()->links() }}
     </div>
@@ -56,6 +57,11 @@
         </thead>
 
         <tbody>
+            @php
+            session()->put('bookmarks.products.add-shops-form',url()->full());
+            session()->put('bookmarks.shops.view',url()->full());
+        @endphp
+
             @foreach ($shops as $shop)
                 <tr>
                     <td><b>

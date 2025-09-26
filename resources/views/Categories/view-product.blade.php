@@ -1,4 +1,4 @@
-@extends('categories.main',[
+@extends('products.main',[
 'title' => $category->name,
 'titleClasses' => ['app-cl-code'],
 ])
@@ -62,6 +62,11 @@
         </tr>
     </thead>
     <tbody>
+
+        @php
+            session()->put('bookmarks.categories.view-product',url()->full());
+        @endphp
+
     @foreach($shops as $product)
     <tr>
         <td>

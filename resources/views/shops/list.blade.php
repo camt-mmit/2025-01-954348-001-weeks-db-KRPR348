@@ -20,6 +20,9 @@
     </search>
 
     <div class="app-cmp-links-bar">
+        @php
+            session()->put('bookmarks.shops.create-form',url()->full());
+        @endphp
         <nav>
             <ul class="app-cmp-links">
                 <li>
@@ -48,6 +51,10 @@
         </thead>
 
         <tbody>
+            @php
+            session()->put('bookmarks.shops.view',url()->full());
+        @endphp
+
             @foreach ($products as $shop)
                 <tr>
                     <td><b>

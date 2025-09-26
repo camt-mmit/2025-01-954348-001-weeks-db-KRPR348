@@ -40,11 +40,11 @@ class ProductController extends SearchableController
     function applywhereToFilterByterm(Builder $query, string $word): void
     {
         parent::applyWhereToFilterByTerm($query, $word);
-        $query ->orWhereHas('category', function (Builder $query)use($word) {
+        $query->orWhereHas('category', function (Builder $query) use ($word) {
             // $query is for Category model
             $query->Where('name', 'LIKE', "%{$word}%");
         });
-        
+
     }
 
     function filterByPrice(
@@ -116,7 +116,11 @@ class ProductController extends SearchableController
         $product->category()->associate($category);
         $product->save();
 
-        return redirect()->route('products.list');
+        return redirect()
+            ->route('products.view', [
+                'product' => $product->code,
+            ])
+            ->with('status', "Product {$product->code} was updated.");
     }
     function showUpdateForm(string $productCode): View
     {
@@ -139,9 +143,11 @@ class ProductController extends SearchableController
         $product->save();
 
 
-        return redirect()->route('products.view', [
-            'product' => $product->code,
-        ]);
+        return redirect()
+            ->route('products.view', [
+                'product' => $product->code,
+            ])
+            ->with('status', "Product {$product->code} was updated.");
     }
 
     function delete(string $productCode): RedirectResponse
@@ -149,7 +155,10 @@ class ProductController extends SearchableController
         $product = $this->find($productCode);
         $product->delete();
 
-        return redirect()->route('products.list');
+        return redirect(
+            session()->get('bookmarks.products.view', route('products.list'))
+        )
+            ->with('status', "Product {$product->code} was deleted.");
     }
 
     function viewShops(ServerRequestInterface $request, ShopController $shopController, string $productCode): View
@@ -208,7 +217,8 @@ class ProductController extends SearchableController
 
         $product->shops()->attach($shop);
 
-        return redirect()->back();
+        return redirect()->back()
+            ->with('status', "Shop {$shop->name} was added to Product {$product->name}.");
     }
     function removeShop(
         ServerRequestInterface $request,
@@ -224,6 +234,10 @@ class ProductController extends SearchableController
 
         $product->shops()->detach($shop);
 
-        return redirect()->back();
+        return redirect(
+            session()->get('bookmarks.products.view-shops', route('products.view', [
+                'product' => $product->code,
+            ])))
+            ->with('status', "Shop {$shop->name} was removed from Product {$product->name}.");
     }
 }

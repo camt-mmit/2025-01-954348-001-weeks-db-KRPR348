@@ -1,4 +1,4 @@
-@extends('shops.main', [
+@extends('products.main', [
     'title' => $shop->name,
     'titleClasses' => ['app-cl-code'],
     'mainClasses' => ['app-ly-max-width'],
@@ -70,6 +70,13 @@
         </thead>
 
         <tbody>
+
+            @php
+            session()->put('bookmarks.shops.view-products',url()->full());
+            @endphp
+            @php
+            session()->put('bookmarks.categories.view',url()->full());
+        @endphp
             @foreach ($shops as $product)
                 <tr>
                     <td>
@@ -81,7 +88,10 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ number_format($product->category_id, 0) }}</td>
+                    <td class="app-cl-number"><a href="{{ route('categories.view', [
+                            'product' => $product->category->code,
+                        ]) }}"
+                            class="app-cl-code">{{ $product->category->name }}</a></td>
                     <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
                     <td class="app-cl-number">{{ $product->shops_count }}</td>
                     <td>

@@ -98,7 +98,9 @@ class ShopController extends SearchableController
     public function create(ServerRequestInterface $request): RedirectResponse
     {
         $product = Shop::create($request->getParsedBody());
-        return redirect()->route('shops.list');
+        return redirect()
+        ->route('shops.list')
+        ->with('status', "Shop {$product->name} was created.");
     }
 
 
@@ -121,7 +123,8 @@ class ShopController extends SearchableController
 
         return redirect()->route('shops.view', [
             'product' => $product->code,
-        ]);
+        ])
+        ->with('status', "Shop {$product->name} was updated.");
     }
 
     function delete(string $productCode): RedirectResponse
@@ -129,7 +132,11 @@ class ShopController extends SearchableController
         $product = $this->find($productCode);
         $product->delete();
 
-        return redirect()->route('shops.list');
+        return redirect(
+            session()->get('bookmarks.shops.view', route('shops.view', [
+                'product' => $product->code,
+            ])))
+        ->with('status', "Shop {$product->name} was deleted.");
     }
 
     function viewProducts(
@@ -194,7 +201,8 @@ class ShopController extends SearchableController
             
                 $shop->products()->attach($product);
 
-            return redirect()->back();
+            return redirect()->back()
+            ->with('status', "Product {$product->name} was added to Shop {$shop->name}.");
         }
     function removeProduct(
         ServerRequestInterface $request,
@@ -210,6 +218,7 @@ class ShopController extends SearchableController
 
         $shop->products()->detach($product);
 
-            return redirect()->back();
+            return redirect()->back()
+            ->with('status', "Product {$product->name} was removed to Shop {$shop->name}.");
     }
 }

@@ -26,6 +26,10 @@
     </search>
 
     <div class="app-cmp-links-bar">
+        @php
+            session()->put('bookmarks.categories.create-form',url()->full());
+        @endphp
+
         <nav>
             <ul class="app-cmp-links">
                 <li>
@@ -53,6 +57,9 @@
         </thead>
 
         <tbody>
+            @php
+            session()->put('bookmarks.categories.view',url()->full());
+        @endphp
             @foreach ($category as $product)
                 <tr>
                     <td>

@@ -29,7 +29,10 @@
         </div>
 
         <div class="app-cmp-form-actions">
-            <button type="submit">Create</button>
+            <button type="submit">Update</button>
+            <a href="{{ route('shops.view', [
+                        'product' => $product->code,
+                    ]) }}"><button type="button">Cancel</button></a>
         </div>
     </form>
 @endsection

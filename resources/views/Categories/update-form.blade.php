@@ -24,6 +24,11 @@
             <textarea name="description" id="" require cols="80" rows="10">{{$product->description}}</textarea>
         </label><br>
 
-        <button type="submit">Update</button>
+        <div class="app-cmp-form-actions">
+            <button type="submit">Update</button>
+            <a href="{{ route('categories.view', [
+                        'product' => $product->code,
+                    ]) }}"><button type="button">Cancel</button></a>
+        </div>
     </form>
 @endsection
