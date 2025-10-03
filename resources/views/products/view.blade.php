@@ -1,5 +1,6 @@
 @extends('products.main', [
     'title' => $product->code,
+    'titleClasses' => ['app-cl-code'],
 ])
 
 @section('header')
@@ -12,30 +13,38 @@
         </form>
 
         <ul class="app-cmp-links">
-            <li>
-                <a href="{{ session()->get('bookmarks.products.view' ,route('products.list')) }}">&lt; Back </a>
-            </li>
+            @php
+                session()->put('bookmarks.products.view-shops', url()->full());
+            @endphp
 
-            <li><a href="{{ route('products.view-shops', [
-            'product' => $product->code,]) }}">View Shops</a>
+            <li>
+                <a href="{{ session()->get('bookmarks.products.view', route('products.list')) }}">&lt; Back</a>
             </li>
             <li>
                 <a
-                    href="{{ route('products.update-form', [
+                    href="{{ route('products.view-shops', [
                         'product' => $product->code,
-                    ]) }}">Update</a>
+                    ]) }}">View
+                    Shops</a>
             </li>
-            <li class="app-cl-warn">
-                <button type="submit" form="app-form-delete" class="app-cl-link">Delete</button>
-            </li>
+            @can('update', $product)
+                <li>
+                    <a
+                        href="{{ route('products.update-form', [
+                            'product' => $product->code,
+                        ]) }}">Update</a>
+                </li>
+            @endcan
+            @can('delete', $product)
+                <li class="app-cl-warn">
+                    <button type="submit" form="app-form-delete" class="app-cl-link">Delete</button>
+                </li>
+            @endcan
         </ul>
     </nav>
 @endsection
 
 @section('content')
-@php
-            session()->put('bookmarks.categories.view',url()->full());
-        @endphp
     <dl class="app-cmp-data-detail">
         <dt>Code</dt>
         <dd>
@@ -49,11 +58,9 @@
 
         <dt>Category</dt>
         <dd>
-         [<a href="{{route('categories.view',[
-            'product' => $product->category->code,]) }}" class="app-cl-code">
-                {{ $product->category->code }} </a>]
-                {{ $product->category->name }}
-    </dd>
+            [<span class="app-cl-code">{{ $product->category->code }}</span>]
+            <span>{{ $product->category->name }}</span>
+        </dd>
 
         <dt>Price</dt>
         <dd>

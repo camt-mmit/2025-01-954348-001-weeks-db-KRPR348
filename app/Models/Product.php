@@ -8,17 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    // ... other declaration
-
-    protected $fillable = ['code', 'name' , 'price' , 'description'];
-
-    function shops(): BelongsToMany
-    {
-        return $this->belongsToMany(Shop::class)->withTimestamps();
-    }
+    protected $fillable = ['code', 'name', 'price', 'description'];
 
     function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    function shops(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class)->withTimestamps();;
     }
 }

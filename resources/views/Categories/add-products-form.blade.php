@@ -1,13 +1,16 @@
-@extends('categories.main',[
-'title' => $category->name,
-'titleClasses' => ['app-cl-code'],
+@extends('categories.main', [
+    'mainClasses' => ['app-ly-max-width'],
+    'title' => $category->code,
+    'titleClasses' => ['app-cl-code'],
+    'subTitle' => 'Add Products',
 ])
-
-
 
 @section('header')
     <search>
-        <form action="{{ route('categories.add-products-form', ['product' => $category->code,]) }}" method="get" class="app-cmp-search-form">
+        <form action="{{ route('categories.add-products-form', [
+            'category' => $category->code,
+        ]) }}"
+            method="get" class="app-cmp-search-form">
             <div class="app-cmp-form-detail">
                 <label for="app-criteria-term">Search</label>
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
@@ -22,24 +25,42 @@
             </div>
 
             <div class="app-cmp-form-actions">
-                <button type="submit" class="primary">Search</button>
-                <a href="{{ route('categories.view-products', ['product' => $category->code,]) }}">
-<button type="button" class="app-cl-accent">X</button></a>
+                <button type="submit" class="app-cl-primary">Search</button>
+                <a
+                    href="{{ route('categories.add-products-form', [
+                        'category' => $category->code,
+                    ]) }}">
+                    <button type="button" class="app-cl-accent">X</button>
+                </a>
             </div>
         </form>
     </search>
-    <div >
-<form action="{{ route('categories.add-product', [
-'product' => $category->code,
-]) }}" id="app-form-add-product" method="post">
-@csrf
-</form></a>
-    </div>
-<ul class="app-cmp-links">
-<li><a href="{{ session()->get('bookmarks.categories.view-product' 
-,route('categories.list')) }}">&lt; Back </a></li>
 
-{{ $categories->withQueryString()->links() }}
+    <div class="app-cmp-links-bar">
+        <nav>
+            <form
+                action="{{ route('categories.add-product', [
+                    'category' => $category->code,
+                ]) }}"
+                id="app-form-add-product" method="post">
+                @csrf
+            </form>
+
+            <ul class="app-cmp-links">
+                <li>
+                    <a
+                        href="{{ session()->get(
+                            'categories.add-products-form',
+                            route('categories.view-products', [
+                                'category' => $category->code,
+                            ]),
+                        ) }}">&lt;
+                        Back</a>
+                </li>
+            </ul>
+        </nav>
+
+        {{ $products->withQueryString()->links() }}
     </div>
 @endsection
 
@@ -49,7 +70,9 @@
             <col style="width: 5ch;" />
             <col />
             <col />
-            <col style="width: 4ch"/>
+            <col />
+            <col style="width: 4ch;" />
+            <col style="width: 0px;" />
         </colgroup>
 
         <thead>
@@ -60,19 +83,18 @@
                 <th>Price</th>
                 <th>No. of Shops</th>
                 <th></th>
-            </tr> 
+            </tr>
         </thead>
 
         <tbody>
+            @php
+                session()->put('bookmarks.products.view', url()->full());
+            @endphp
 
-        @php
-            session()->put('bookmarks.products.view',url()->full());
-        @endphp
-
-            @foreach ($categories as $product)
+            @foreach ($products as $product)
                 <tr>
                     <td>
-                        <a href="{{ route('categories.view', [
+                        <a href="{{ route('products.view', [
                             'product' => $product->code,
                         ]) }}"
                             class="app-cl-code">
@@ -80,12 +102,13 @@
                         </a>
                     </td>
                     <td>{{ $product->name }}</td>
-                    <td >{{ $product->category->name }}</td>
+                    <td>{{ $product->category->name }}</td>
                     <td class="app-cl-number">{{ number_format($product->price, 2) }}</td>
-                    <td class="app-cl-number">{{ $product->shops_count }}</td>
+                    <td class="app-cl-number">{{ number_format($product->shops_count, 0) }}</td>
                     <td>
-                        <button type="submit" form="app-form-add-product" name="shop" 
-                        value="{{ $product->code }}">Add</button>
+                        <button type="submit" form="app-form-add-product" name="product" value="{{ $product->code }}">
+                            Add
+                        </button>
                     </td>
                 </tr>
             @endforeach

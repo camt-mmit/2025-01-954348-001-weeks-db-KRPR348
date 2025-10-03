@@ -1,34 +1,33 @@
-@extends('categories.main',[
-'title' => $product->code,
+@extends('categories.main', [
+    'title' => $category->code,
+    'titleClasses' => ['app-cl-code'],
 ])
 
 @section('content')
-    <form action="{{route('categories.update',[
-        'product' => $product->code,
-    ])}}" method="post">
+    <form action="{{ route('categories.update', [
+        'category' => $category->code,
+    ]) }}" method="post">
         @csrf
 
-        <label for="">
-            <b>Code</b>
-            <input type="text" name="code" require value="{{$product->code}}">
-        </label><br>
+        <div class="app-cmp-form-detail">
+            <label for="app-inp-code">Code</label>
+            <input type="text" id="app-inp-code" name="code" value="{{ $category->code }}" required class="app-cl-code" />
 
-        <label for="">
-            <b>Name</b>
-            <input type="text" name="name" require value="{{$product->name}}">
-        </label><br>
+            <label for="app-inp-name">Name</label>
+            <input type="text" id="app-inp-name" name="name" value="{{ $category->name }}" required />
 
-
-        <label for="">
-            <b>Description</b>
-            <textarea name="description" id="" require cols="80" rows="10">{{$product->description}}</textarea>
-        </label><br>
+            <label for="app-inp-description">Description</label>
+            <textarea id="app-inp-descruotuib" name="description" cols="80" rows="10" required>{{ $category->description }}</textarea>
+        </div>
 
         <div class="app-cmp-form-actions">
             <button type="submit">Update</button>
-            <a href="{{ route('categories.view', [
-                        'product' => $product->code,
-                    ]) }}"><button type="button">Cancel</button></a>
+            <a
+                href="{{ route('categories.view', [
+                    'category' => $category->code,
+                ]) }}">
+                <button type="button">Cancel</button>
+            </a>
         </div>
     </form>
 @endsection

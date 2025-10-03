@@ -1,50 +1,61 @@
-@extends('categories.main',[
-'title' => $product->name,
+@extends('categories.main', [
+    'title' => $category->code,
+    'titleClasses' => ['app-cl-code'],
 ])
+
 @section('header')
-<nav>
-    <form action="{{route('categories.delete',[
-        'product' => $product->code,
-    ])}}" method="post" id="app-form-delete">
-        @csrf
-    </form>
-    <ul class="app-cmp-links">
-        <li>
-                <a href="{{ session()->get('bookmarks.categories.view' ,route('categories.list')) }}">&lt; Back </a>
+    <nav>
+        <form action="{{ route('categories.delete', [
+            'category' => $category->code,
+        ]) }}" method="post"
+            id="app-form-delete">
+            @csrf
+        </form>
+
+        <ul class="app-cmp-links">
+            @php
+                session()->put('bookmarks.categories.view-products', url()->full());
+            @endphp
+
+            <li>
+                <a href="{{ session()->get('bookmarks.categories.view', route('categories.list')) }}">&lt; Back</a>
             </li>
-        <li >
-            <a href="{{route('categories.update-form',[
-            'product' => $product->code,
-            ])}}">Update</a>
-        </li>
-
-        <li >
-            <a href="{{ route('categories.view-products', [
-            'product' => $product->code,
-            ]) }}">View Products</a></li>
-        <li class="app-cl-warn">
-            <button type="submit" form="app-form-delete" class="app-cl-link">Delete</button>
-        </li>
-    </ul>
-</nav>
+            <li>
+                <a
+                    href="{{ route('categories.view-products', [
+                        'category' => $category->code,
+                    ]) }}">View
+                    Products</a>
+            </li>
+            @can('update', $category)
+                <li>
+                    <a
+                        href="{{ route('categories.update-form', [
+                            'category' => $category->code,
+                        ]) }}">Update</a>
+                </li>
+            @endcan
+            @can('delete', $category)
+                <li class="app-cl-warn">
+                    <button type="submit" form="app-form-delete" class="app-cl-link">Delete</button>
+                </li>
+            @endcan
+        </ul>
+    </nav>
 @endsection
+
 @section('content')
-<dl class="app-cmp-data-detail">
-    <dt>Code</dt>
-    <dd>
-        {{ $product->code }}
-    </dd>
+    <dl class="app-cmp-data-detail">
+        <dt>Code</dt>
+        <dd>
+            <span class="app-cl-code">{{ $category->code }}</span>
+        </dd>
 
-    <dt>Name</dt>
-    <dd>
-        {{ $product->name }}
-    </dd>
+        <dt>Name</dt>
+        <dd>
+            {{ $category->name }}
+        </dd>
+    </dl>
 
-
-    <dt>Description</dt>
-    <dd>
-        <pre>{{ $product->description }}</pre>
-    </dd>
-</dl>
-
+    <pre>{{ $category->description }}</pre>
 @endsection

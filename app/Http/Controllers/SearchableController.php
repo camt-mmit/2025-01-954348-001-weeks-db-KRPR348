@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Database\Eloquent\Relations\Relation;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 abstract class SearchableController extends Controller
 {
@@ -24,7 +25,7 @@ abstract class SearchableController extends Controller
             ->orWhere('name', 'LIKE', "%{$word}%");
     }
 
-    function filterByTerm(Builder|Relation $query, ?string $term): Builder|Relation
+    function filterByTerm(Builder | Relation $query, ?string $term): Builder | Relation
     {
         if (!empty($term)) {
             foreach (\preg_split('/\s+/', \trim($term)) as $word) {
@@ -37,7 +38,7 @@ abstract class SearchableController extends Controller
         return $query;
     }
 
-    function filter(Builder|Relation $query, array $criteria): Builder|Relation
+    function filter(Builder | Relation $query, array $criteria): Builder | Relation
     {
         return $this->filterByTerm($query, $criteria['term']);
     }

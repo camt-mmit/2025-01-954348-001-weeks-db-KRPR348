@@ -1,5 +1,6 @@
-@extends('shops.main',[
-'title' => 'List',
+@extends('shops.main', [
+    'title' => 'List',
+    'mainClasses' => ['app-ly-max-width'],
 ])
 
 @section('header')
@@ -11,27 +12,30 @@
             </div>
 
             <div class="app-cmp-form-actions">
-                <button type="submit" class="primary">Search</button>
+                <button type="submit" class="app-cl-primary">Search</button>
                 <a href="{{ route('shops.list') }}">
-                    <button type="button" class="accent">X</button>
+                    <button type="button" class="app-cl-accent">X</button>
                 </a>
             </div>
         </form>
     </search>
 
     <div class="app-cmp-links-bar">
-        @php
-            session()->put('bookmarks.shops.create-form',url()->full());
-        @endphp
         <nav>
+            @php
+                session()->put('bookmarks.shops.create-form', url()->full());
+            @endphp
+
             <ul class="app-cmp-links">
-                <li>
-                    <a href="{{ route('shops.create-form') }}">New Shop</a>
-                </li>
+                @can('create', \App\Models\Shop::class)
+                    <li>
+                        <a href="{{ route('shops.create-form') }}">New Shop</a>
+                    </li>
+                @endcan
             </ul>
         </nav>
 
-        {{ $products->withQueryString()->links() }}
+        {{ $shops->withQueryString()->links() }}
     </div>
 @endsection
 
@@ -39,6 +43,9 @@
     <table class="app-cmp-data-list">
         <colgroup>
             <col style="width: 5ch;" />
+            <col />
+            <col />
+            <col style="width: 4ch;" />
         </colgroup>
 
         <thead>
@@ -52,22 +59,22 @@
 
         <tbody>
             @php
-            session()->put('bookmarks.shops.view',url()->full());
-        @endphp
+                session()->put('bookmarks.shops.view', url()->full());
+            @endphp
 
-            @foreach ($products as $shop)
+            @foreach ($shops as $shop)
                 <tr>
-                    <td><b>
+                    <td>
                         <a href="{{ route('shops.view', [
-                            'product' => $shop->code,
+                            'shop' => $shop->code,
                         ]) }}"
                             class="app-cl-code">
                             {{ $shop->code }}
-                        </b></a>
+                        </a>
                     </td>
                     <td>{{ $shop->name }}</td>
                     <td>{{ $shop->owner }}</td>
-                    <td class="app-cl-number">{{  number_format($shop->products_count,0) }}</td>
+                    <td class="app-cl-number">{{ $shop->products_count }}</td>
                 </tr>
             @endforeach
         </tbody>

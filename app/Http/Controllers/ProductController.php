@@ -1,16 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Category;
-use App\Models\Shop;
+
 use App\Models\Product;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse as HttpFoundationRedirectResponse;
 
 class ProductController extends SearchableController
 {
@@ -37,21 +35,23 @@ class ProductController extends SearchableController
     }
 
     #[\Override]
-    function applywhereToFilterByterm(Builder $query, string $word): void
+    function applyWhereToFilterByTerm(Builder $query, string $word): void
     {
         parent::applyWhereToFilterByTerm($query, $word);
-        $query->orWhereHas('category', function (Builder $query) use ($word) {
-            // $query is for Category model
-            $query->Where('name', 'LIKE', "%{$word}%");
-        });
 
+        $query->orWhereHas(
+            'category',
+            function (Builder $innerQuery) use ($word): void {
+                $innerQuery->where('name', 'LIKE', "%{$word}%");
+            },
+        );
     }
 
     function filterByPrice(
-        Builder|Relation $query,
+        Builder | Relation $query,
         ?float $minPrice,
         ?float $maxPrice
-    ): Builder|Relation {
+    ): Builder | Relation {
         if ($minPrice !== null) {
             $query->where('price', '>=', $minPrice);
         }
@@ -64,7 +64,7 @@ class ProductController extends SearchableController
     }
 
     #[\Override]
-    function filter(Builder|Relation $query, array $criteria): Builder|Relation
+    function filter(Builder | Relation $query, array $criteria): Builder | Relation
     {
         $query = parent::filter($query, $criteria);
         $query = $this->filterByPrice(
@@ -78,8 +78,13 @@ class ProductController extends SearchableController
 
     function list(ServerRequestInterface $request): View
     {
+        Gate::authorize('list', Product::class);
+
         $criteria = $this->prepareCriteria($request->getQueryParams());
-        $query = $this->search($criteria)->withCount('shops');
+        $query = $this
+            ->search($criteria)
+            ->with('category')
+            ->withCount('shops');
 
         return view('products.list', [
             'criteria' => $criteria,
@@ -91,23 +96,30 @@ class ProductController extends SearchableController
     {
         $product = $this->find($productCode);
 
+        Gate::authorize('view', $product);
+
         return view('products.view', [
             'product' => $product,
         ]);
     }
 
-    public function showCreateForm(): View
+    function showCreateForm(CategoryController $categoryController): View
     {
-        // $category = $categorycontroller->getQuery()->get();
-        $category = Category::all();
+        Gate::authorize('create', Product::class);
+
+        $categories = $categoryController->getQuery()->get();
+
         return view('products.create-form', [
-            'category' => $category,
+            'categories' => $categories,
         ]);
     }
 
+    function create(
+        ServerRequestInterface $request,
+        CategoryController $categoryController,
+    ): RedirectResponse {
+        Gate::authorize('create', Product::class);
 
-    public function create(ServerRequestInterface $request, CategoryController $categoryController): RedirectResponse
-    {
         $data = $request->getParsedBody();
         $category = $categoryController->find($data['category']);
 
@@ -116,25 +128,37 @@ class ProductController extends SearchableController
         $product->category()->associate($category);
         $product->save();
 
-        return redirect()
-            ->route('products.view', [
-                'product' => $product->code,
-            ])
-            ->with('status', "Product {$product->code} was updated.");
+        return redirect(
+            session()->get('bookmarks.products.create-form', route('products.list')),
+        )
+            ->with('status', "Product {$product->code} was created");
     }
-    function showUpdateForm(string $productCode): View
-    {
-        $category = Category::all();
+
+    function showUpdateForm(
+        CategoryController $categoryController,
+        string $productCode,
+    ): View {
         $product = $this->find($productCode);
+
+        Gate::authorize('update', $product);
+
+        $categories = $categoryController->getQuery()->get();
+
         return view('products.update-form', [
             'product' => $product,
-            'category' => $category,
+            'categories' => $categories,
         ]);
     }
 
-    function update(ServerRequestInterface $request, string $productCode, CategoryController $categoryController): RedirectResponse
-    {
+    function update(
+        ServerRequestInterface $request,
+        CategoryController $categoryController,
+        string $productCode,
+    ): RedirectResponse {
         $product = $this->find($productCode);
+
+        Gate::authorize('update', $product);
+
         $data = $request->getParsedBody();
         $category = $categoryController->find($data['category']);
 
@@ -142,43 +166,57 @@ class ProductController extends SearchableController
         $product->category()->associate($category);
         $product->save();
 
-
         return redirect()
             ->route('products.view', [
                 'product' => $product->code,
             ])
-            ->with('status', "Product {$product->code} was updated.");
+            ->with('status', "Product {$product->code} was updated");
     }
 
     function delete(string $productCode): RedirectResponse
     {
         $product = $this->find($productCode);
+
+        Gate::authorize('create', $product);
+
         $product->delete();
 
         return redirect(
-            session()->get('bookmarks.products.view', route('products.list'))
+            session()->get('bookmarks.products.view', route('products.list')),
         )
-            ->with('status', "Product {$product->code} was deleted.");
+            ->with('status', "Product {$product->code} was deleted");
     }
 
-    function viewShops(ServerRequestInterface $request, ShopController $shopController, string $productCode): View
-    {
+    function viewShops(
+        ServerRequestInterface $request,
+        ShopController $shopController,
+        string $productCode,
+    ): View {
         $product = $this->find($productCode);
+
+        Gate::authorize('view', $product);
+
         $criteria = $shopController->prepareCriteria($request->getQueryParams());
         $query = $shopController
-
             ->filter($product->shops(), $criteria)
             ->withCount('products');
+
         return view('products.view-shops', [
             'product' => $product,
             'criteria' => $criteria,
             'shops' => $query->paginate($shopController::MAX_ITEMS),
         ]);
     }
-    function showAddShopsForm(ServerRequestInterface $request, ShopController $shopController, string $productCode): View
-    {
+
+    function showAddShopsForm(
+        ServerRequestInterface $request,
+        ShopController $shopController,
+        string $productCode,
+    ): View {
         $product = $this->find($productCode);
-        $criteria = $shopController->prepareCriteria($request->getQueryParams());
+
+        Gate::authorize('update', $product);
+
         $query = $shopController
             ->getQuery()
             ->whereDoesntHave(
@@ -187,6 +225,8 @@ class ProductController extends SearchableController
                     return $innerQuery->where('code', $product->code);
                 },
             );
+
+        $criteria = $shopController->prepareCriteria($request->getQueryParams());
         $query = $shopController
             ->filter($query, $criteria)
             ->withCount('products');
@@ -197,19 +237,24 @@ class ProductController extends SearchableController
             'shops' => $query->paginate($shopController::MAX_ITEMS),
         ]);
     }
+
     function addShop(
         ServerRequestInterface $request,
         ShopController $shopController,
         string $productCode,
     ): RedirectResponse {
         $product = $this->find($productCode);
+
+        Gate::authorize('update', $product);
+
         $data = $request->getParsedBody();
+
         $shop = $shopController
             ->getQuery()
             ->whereDoesntHave(
                 'products',
-                function (Builder $innerQuery) use ($product): void {
-                    $innerQuery->where('code', $product->code);
+                function (Builder $innerQuery) use ($product) {
+                    return $innerQuery->where('code', $product->code);
                 },
             )
             ->where('code', $data['shop'])
@@ -217,27 +262,29 @@ class ProductController extends SearchableController
 
         $product->shops()->attach($shop);
 
-        return redirect()->back()
-            ->with('status', "Shop {$shop->name} was added to Product {$product->name}.");
+        return redirect()
+            ->back()
+            ->with('status', "Shop {$shop->code} was added to Product {$product->code}");
     }
+
     function removeShop(
         ServerRequestInterface $request,
         string $productCode,
     ): RedirectResponse {
         $product = $this->find($productCode);
+
+        Gate::authorize('update', $product);
+
         $data = $request->getParsedBody();
 
-        $shop = $product
-            ->shops()
+        $shop = $product->shops()
             ->where('code', $data['shop'])
             ->firstOrFail();
 
         $product->shops()->detach($shop);
 
-        return redirect(
-            session()->get('bookmarks.products.view-shops', route('products.view', [
-                'product' => $product->code,
-            ])))
-            ->with('status', "Shop {$shop->name} was removed from Product {$product->name}.");
+        return redirect()
+            ->back()
+            ->with('status', "Shop {$shop->code} was removed from Product {$product->code}");
     }
 }

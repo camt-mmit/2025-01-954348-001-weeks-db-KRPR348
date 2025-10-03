@@ -1,9 +1,7 @@
-@extends('Categories.main', [
+@extends('categories.main', [
     'title' => 'List',
     'mainClasses' => ['app-ly-max-width'],
 ])
-
-@section('header')
 
 @section('header')
     <search>
@@ -13,32 +11,31 @@
                 <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
             </div>
 
-
-
-
             <div class="app-cmp-form-actions">
-                <button type="submit" class="primary">Search</button>
+                <button type="submit" class="app-cl-primary">Search</button>
                 <a href="{{ route('categories.list') }}">
-                    <button type="button" class="accent">X</button>
+                    <button type="button" class="app-cl-accent">X</button>
                 </a>
             </div>
         </form>
     </search>
 
     <div class="app-cmp-links-bar">
-        @php
-            session()->put('bookmarks.categories.create-form',url()->full());
-        @endphp
-
         <nav>
+            @php
+                session()->put('bookmarks.categories.create-form', url()->full());
+            @endphp
+
             <ul class="app-cmp-links">
-                <li>
-                    <a href="{{ route('categories.create-form') }}">New Category</a>
-                </li>
+                @can('create', \App\Models\Category::class)
+                    <li>
+                        <a href="{{ route('categories.create-form') }}">New Category</a>
+                    </li>
+                @endcan
             </ul>
         </nav>
 
-        {{ $category->withQueryString()->links() }}
+        {{ $categories->withQueryString()->links() }}
     </div>
 @endsection
 
@@ -46,32 +43,35 @@
     <table class="app-cmp-data-list">
         <colgroup>
             <col style="width: 5ch;" />
+            <col />
+            <col style="width: 4ch;" />
         </colgroup>
 
         <thead>
             <tr>
                 <th>Code</th>
                 <th>Name</th>
-                <th>No. of Shops</th>
+                <th>No. of Products</th>
             </tr>
         </thead>
 
         <tbody>
             @php
-            session()->put('bookmarks.categories.view',url()->full());
-        @endphp
-            @foreach ($category as $product)
+                session()->put('bookmarks.categories.view', url()->full());
+            @endphp
+
+            @foreach ($categories as $category)
                 <tr>
                     <td>
                         <a href="{{ route('categories.view', [
-                            'product' => $product->code,
+                            'category' => $category->code,
                         ]) }}"
                             class="app-cl-code">
-                            {{ $product->code }}
+                            {{ $category->code }}
                         </a>
                     </td>
-                    <td>{{ $product->name }}</td>
-                    <td class="app-cl-number">{{ $product->products_count }}</td>
+                    <td>{{ $category->name }}</td>
+                    <td class="app-cl-number">{{ $category->products_count }}</td>
                 </tr>
             @endforeach
         </tbody>

@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Contracts\View\View;
 use App\Models\Shop;
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Psr\Http\Message\ServerRequestInterface;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Psr\Http\Message\ServerRequestInterface;
+use Illuminate\Support\Facades\Gate;
 
 class ShopController extends SearchableController
 {
@@ -20,205 +19,182 @@ class ShopController extends SearchableController
         return Shop::orderBy('code');
     }
 
-    // #[\Override]
-    // function applywhereToFilterByterm(Builder $query, string $word): void
-    // {
-    //     parent::applyWhereToFilterByTerm($query, $word);
-    //     $query->orWhere('owner', 'LIKE', "%{$word}%");
-    // }
-
     #[\Override]
-    function prepareCriteria(array $criteria): array
+    function applyWhereToFilterByTerm(Builder $query, string $word): void
     {
-        return [
-            ...parent::prepareCriteria($criteria),
-            'minPrice' => (($criteria['minPrice'] ?? null) === null)
-                ? null
-                : (float) $criteria['minPrice'],
-            'maxPrice' => (($criteria['maxPrice'] ?? null) === null)
-                ? null
-                : (float) $criteria['maxPrice'],
-        ];
+        parent::applyWhereToFilterByTerm($query, $word);
+
+        $query->orWhere('owner', 'LIKE', "%{$word}%");
     }
 
-    function filterByPrice(
-        Builder|Relation $query,
-        ?float $minPrice,
-        ?float $maxPrice
-    ): Builder|Relation {
-        if ($minPrice !== null) {
-            $query->where('price', '>=', $minPrice);
-        }
-        if ($maxPrice !== null) {
-            $query->where('price', '<=', $maxPrice);
-        }
-
-        return $query;
-    }
-    #[\Override]
-    function filter(Builder|Relation $query, array $criteria): Builder|Relation
+    function list(ServerRequestInterface $request): View
     {
-        $query = parent::filter($query, $criteria);
-        $query = $this->filterByPrice(
-            $query,
-            $criteria['minPrice'],
-            $criteria['maxPrice'],
-        );
-
-        return $query;
-    }
-
-    public function list(ServerRequestInterface $request): View
-    {
+        Gate::authorize('list', Shop::class);
         $criteria = $this->prepareCriteria($request->getQueryParams());
         $query = $this->search($criteria)->withCount('products');
-        // $products = shops::orderBy('code')->get();
-        return view(
-            'shops.list',
-            [
-                'criteria' => $criteria,
-                'products' => $query->paginate(self::MAX_ITEMS),
-            ]
-        );
-    }
 
-    public function view(string $productCode): View
-    {
-        $product = Shop::where('code', $productCode)->firstOrFail();
-        return view('shops.view', [
-            'product' => $product,
+        return view('shops.list', [
+            'criteria' => $criteria,
+            'shops' => $query->paginate(self::MAX_ITEMS),
         ]);
     }
 
-    public function showCreateForm(): View
+    function view(string $shopCode): View
     {
+        $shop = $this->find($shopCode);
+
+        Gate::authorize('view', $shop);
+        return view('shops.view', [
+            'shop' => $shop,
+        ]);
+    }
+
+    function showCreateForm(): View
+    {
+        Gate::authorize('create', Shop::class);
         return view('shops.create-form');
     }
 
-    public function create(ServerRequestInterface $request): RedirectResponse
+    function create(ServerRequestInterface $request): RedirectResponse
     {
-        $product = Shop::create($request->getParsedBody());
-        return redirect()
-        ->route('shops.list')
-        ->with('status', "Shop {$product->name} was created.");
+        Gate::authorize('create', Shop::class);
+        $shop = Shop::create($request->getParsedBody());
+
+        return redirect(
+            session()->get('bookmarks.shops.create-form', route('shops.list')),
+        )
+            ->with('status', "Shop {$shop->code} was created");
     }
 
-
-
-
-    function showUpdateForm(string $productCode): View
+    function showUpdateForm(string $shopCode): View
     {
-        $product = $this->find($productCode);
-
+        $shop = $this->find($shopCode);
+        Gate::authorize('update', $shop);
         return view('shops.update-form', [
-            'product' => $product,
+            'shop' => $shop,
         ]);
     }
 
-    function update(ServerRequestInterface $request, string $productCode,): RedirectResponse
-    {
-        $product = $this->find($productCode);
-        $product->fill($request->getParsedBody());
-        $product->save();
+    function update(
+        ServerRequestInterface $request,
+        string $shopCode,
+    ): RedirectResponse {
+        $shop = $this->find($shopCode);
+        Gate::authorize('update', $shop);
+        $shop->fill($request->getParsedBody());
+        $shop->save();
 
-        return redirect()->route('shops.view', [
-            'product' => $product->code,
-        ])
-        ->with('status', "Shop {$product->name} was updated.");
+        return redirect()
+            ->route('shops.view', [
+                'shop' => $shop->code,
+            ])
+            ->with('status', "Shop {$shop->code} was updated");
     }
 
-    function delete(string $productCode): RedirectResponse
+    function delete(string $shopCode): RedirectResponse
     {
-        $product = $this->find($productCode);
-        $product->delete();
+        $shop = $this->find($shopCode);
+        Gate::authorize('create', $shop);
+        $shop->delete();
 
         return redirect(
-            session()->get('bookmarks.shops.view', route('shops.view', [
-                'product' => $product->code,
-            ])))
-        ->with('status', "Shop {$product->name} was deleted.");
+            session()->get('bookmarks.shops.view', route('shops.list')),
+        )
+            ->with('status', "Shop {$shop->code} was deleted");
     }
 
     function viewProducts(
         ServerRequestInterface $request,
-        ShopController $shopController,
-        String $productCode,
-    ): view {
-        $shop = $this->find($productCode);
-        $criteria = $shopController->prepareCriteria($request->getQueryParams());
-        $query = $shopController->filter(
-            $shop->products(),
-            $criteria,
-        )
+        ProductController $productController,
+        string $shopCode,
+    ): View {
+        $shop = $this->find($shopCode);
+        Gate::authorize('view', $shop);
+        $criteria = $productController->prepareCriteria($request->getQueryParams());
+        $query = $productController
+            ->filter($shop->products(), $criteria)
+            ->with('category')
             ->withCount('shops');
 
         return view('shops.view-products', [
             'shop' => $shop,
             'criteria' => $criteria,
-            'shops' => $query->paginate($shopController::MAX_ITEMS),
+            'products' => $query->paginate($productController::MAX_ITEMS),
         ]);
     }
 
-    function showAddProductsForm(ServerRequestInterface $request, ProductController $productController, string $productCode): View
-    {
-        $shop = $this->find($productCode);
-        $criteria = $productController->prepareCriteria($request->getQueryParams());
+    function showAddProductsForm(
+        ServerRequestInterface $request,
+        ProductController $productController,
+        string $shopCode,
+    ): View {
+        $shop = $this->find($shopCode);
+        Gate::authorize('update', $shop);
         $query = $productController
             ->getQuery()
             ->whereDoesntHave(
-                 'shops',
+                'shops',
                 function (Builder $innerQuery) use ($shop) {
                     return $innerQuery->where('code', $shop->code);
                 },
             );
+
+        $criteria = $productController->prepareCriteria($request->getQueryParams());
         $query = $productController
             ->filter($query, $criteria)
+            ->with('category')
             ->withCount('shops');
 
         return view('shops.add-products-form', [
             'criteria' => $criteria,
             'shop' => $shop,
-            'shops' => $query->paginate($productController::MAX_ITEMS),
+            'products' => $query->paginate($productController::MAX_ITEMS),
         ]);
     }
-        function addProduct(
-            ServerRequestInterface $request,
-            ProductController $productController,
-            string $productCode,
-        ) : RedirectResponse {
-            $shop = $this->find($productCode);
+
+    function addProduct(
+        ServerRequestInterface $request,
+        ProductController $productController,
+        string $shopCode,
+    ): RedirectResponse {
+        $shop = $this->find($shopCode);
+        Gate::authorize('update', $shop);
         $data = $request->getParsedBody();
+
         $product = $productController
             ->getQuery()
             ->whereDoesntHave(
                 'shops',
-                function (Builder $innerQuery) use ($shop): void {
-                    $innerQuery->where('code', $shop->code);
+                function (Builder $innerQuery) use ($shop) {
+                    return $innerQuery->where('code', $shop->code);
                 },
             )
-            ->where('code',$data['shop'])
+            ->where('code', $data['product'])
             ->firstOrFail();
-            
-                $shop->products()->attach($product);
 
-            return redirect()->back()
-            ->with('status', "Product {$product->name} was added to Shop {$shop->name}.");
-        }
+        $shop->products()->attach($product);
+
+        return redirect()
+            ->back()
+            ->with('status', "Product {$product->code} was added to Shop {$shop->code}");
+    }
+
     function removeProduct(
         ServerRequestInterface $request,
-        string $productCode,
+        string $shopCode,
     ): RedirectResponse {
-        $shop = $this->find($productCode);
+        $shop = $this->find($shopCode);
+        Gate::authorize('update', $shop);
         $data = $request->getParsedBody();
 
-        $product = $shop
-            ->products()
-            ->where('code',$data['shop'])
+        $product = $shop->products()
+            ->where('code', $data['product'])
             ->firstOrFail();
 
         $shop->products()->detach($product);
 
-            return redirect()->back()
-            ->with('status', "Product {$product->name} was removed to Shop {$shop->name}.");
+        return redirect()
+            ->back()
+            ->with('status', "Product {$product->code} was removed from Shop {$shop->code}");
     }
 }
